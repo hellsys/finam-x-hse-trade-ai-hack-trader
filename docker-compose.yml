@@ -1,6 +1,30 @@
-# Docker Compose configuration for Finam AI Trader
+# Docker Compose configuration for Finam AI Trader with MCP REST API
 
 services:
+  # MCP REST API сервис (отдельный контейнер)
+  mcp-api:
+    build:
+      context: .
+      dockerfile: Dockerfile.mcp
+    container_name: finam-mcp-api
+    ports:
+      - "8000:8000"
+    environment:
+      # Finam TradeAPI - используйте API ключ (рекомендуется) или JWT токен
+      - FINAM_API_KEY=${FINAM_API_KEY:-}
+      - FINAM_ACCESS_TOKEN=${FINAM_ACCESS_TOKEN:-}
+      - FINAM_API_BASE_URL=${FINAM_API_BASE_URL:-https://api.finam.ru}
+      - MCP_API_PORT=8000
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - finam-network
+
   # Streamlit веб-интерфейс
   web:
     build:
@@ -15,9 +39,13 @@ services:
       - OPENROUTER_BASE=${OPENROUTER_BASE:-https://openrouter.ai/api/v1}
       - OPENROUTER_MODEL=${OPENROUTER_MODEL:-openai/gpt-4o-mini}
 
-      # Finam TradeAPI
+      # Finam TradeAPI (опционально, если нужен прямой доступ)
+      - FINAM_API_KEY=${FINAM_API_KEY:-}
       - FINAM_ACCESS_TOKEN=${FINAM_ACCESS_TOKEN:-}
       - FINAM_API_BASE_URL=${FINAM_API_BASE_URL:-https://api.finam.ru}
+
+      # MCP API URL (внутренняя сеть Docker)
+      - MCP_API_URL=http://mcp-api:8000
 
       # App settings
       - APP_DEBUG=${APP_DEBUG:-false}
@@ -25,6 +53,9 @@ services:
       # Монтируем код для разработки (закомментируйте для production)
       - ./src:/app/src
       - ./data:/app/data
+    depends_on:
+      mcp-api:
+        condition: service_healthy
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]

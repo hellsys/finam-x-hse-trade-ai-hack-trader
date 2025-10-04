@@ -4,14 +4,14 @@ black==25.9.0
 certifi==2025.8.3
 charset-normalizer==3.4.3
 click==8.3.0
-fastapi==0.118.0
--e git+https://github.com/Orange-Hack/finam-x-hse-trade-ai-hack-trader.git@64cc4c328f90da6d19316fcc1f6592acb903378c#egg=finam_x_hse_trade_ai_hack_trader
+fastapi>=0.118.0
 h11==0.16.0
 httpcore==1.0.9
 httpx==0.28.1
 idna==3.10
 iniconfig==2.1.0
 mypy_extensions==1.1.0
+streamlit>=1.40.0
 narwhals==2.6.0
 numpy==2.3.3
 packaging==25.0
@@ -39,4 +39,4 @@ typing-inspection==0.4.2
 typing_extensions==4.15.0
 tzdata==2025.2
 urllib3==2.5.0
-uvicorn==0.37.0
+uvicorn>=0.37.0
